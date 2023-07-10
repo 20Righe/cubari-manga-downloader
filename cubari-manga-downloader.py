@@ -1,3 +1,7 @@
+# Script Name: cubari-manga-downloader.py
+# Created Date: 2021-10-11
+# Description: A Python script to download manga from Cubari.
+
 import requests
 import os
 from pathlib import Path
