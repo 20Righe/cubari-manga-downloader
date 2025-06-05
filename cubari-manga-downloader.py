@@ -6,7 +6,7 @@ import requests
 import os
 from pathlib import Path
 import argparse
-
+import time
 
 class CubariDowlonader:
 
@@ -59,9 +59,14 @@ class CubariDowlonader:
 
             for group_id, chapter_link in chapter["groups"].items():
 
+                # list of pages link
+                if (type(chapter_link) is list):
+                    d = self.get_data_from_list(chapter_link)
+                # /proxy/api/imgur/chapter/wCvC1lw/
+                else:
+                    d = self.get_data_from_proxy(chapter_link)
+                
                 print("[START] download C{}".format(chapter_number))
-                r = requests.get(self.site_url.format(chapter_link))
-                d = r.json()
 
                 group_name = groups[group_id]
 
@@ -82,14 +87,15 @@ class CubariDowlonader:
                     if (not pathfile.exists()):
                         print("Download page {}. Link: {}".format(
                             i, d[i]["src"]))
-                        r = requests.get(d[i]["src"])
-                        pathfile.write_bytes(r.content)
+                        r_content = self.download_img(d[i]["src"])
+                        pathfile.write_bytes(r_content)
+                        time.sleep(1)
                     else:
                         print("Page {} already exist. Link:{}".format(
                             i, d[i]["src"]))
 
                 print("[END] download C{}".format(chapter_number))
-
+    
     def get_manga_id_by_url(self, url):
         try:
             url_split = url.split("/")
@@ -102,11 +108,43 @@ class CubariDowlonader:
             print("Missing or invalid link:", str(e))
             exit()
 
+    def download_img(self, url):
+        try:
+            if "imgur.com" in url:
+                r = self.download_from_imgur(url)
+            else:
+                r = self.download_from_generic(url)
+            if r.status_code != 200:
+                print("Failed to download page {}. Status code: {}".format(url, r.status_code))
+            else:
+                return r.content
+        except requests.exceptions.RequestException as e:
+            print("Error downloading page {}: {}".format(url, str(e)))
+        
+    def download_from_generic(self, url):
+        r = requests.get(url, timeout=10, headers={"User-Agent": "Mozilla/5.0"})
+        return r
+
+    def download_from_imgur(self, url):
+        url = url.replace("i.", "")
+        r = requests.get(url, timeout=10, headers={"User-Agent": "Mozilla/5.0"})
+        return r
+    
+    def get_data_from_proxy(self, chapter_link):
+        r = requests.get(self.site_url.format(chapter_link))
+        d = r.json()
+        return d
+    
+    def get_data_from_list(self, chapter_list):
+        d = [{"src": link} for link in chapter_list]
+        return d
+
 
 if __name__ == '__main__':
 
     # CubariDowlonader().list_chapter("https://cubari.moe/read/gist/JECbu/")
     # CubariDowlonader().download_chapters("https://cubari.moe/read/gist/JECbu/", ['1','4'])
+    # CubariDowlonader().download_chapters("https://cubari.moe/read/gist/cmF3L2NoaWNrbi1ub29kbGUvU2VyaWVzLS9tYWluL0hhcmFwZWtvLmpzb24/", ['1'])
     # CubariDowlonader().download_chapters("https://cubari.moe/read/gist/JECbu/")
 
     parser = argparse.ArgumentParser(description='Cubari Manga Downloader.')
