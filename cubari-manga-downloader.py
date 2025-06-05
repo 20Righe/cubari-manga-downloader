@@ -141,12 +141,6 @@ class CubariDowlonader:
 
 
 if __name__ == '__main__':
-
-    # CubariDowlonader().list_chapter("https://cubari.moe/read/gist/JECbu/")
-    # CubariDowlonader().download_chapters("https://cubari.moe/read/gist/JECbu/", ['1','4'])
-    # CubariDowlonader().download_chapters("https://cubari.moe/read/gist/cmF3L2NoaWNrbi1ub29kbGUvU2VyaWVzLS9tYWluL0hhcmFwZWtvLmpzb24/", ['1'])
-    # CubariDowlonader().download_chapters("https://cubari.moe/read/gist/JECbu/")
-
     parser = argparse.ArgumentParser(description='Cubari Manga Downloader.')
 
     parser.add_argument('link', type=str, nargs='?',
