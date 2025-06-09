@@ -110,25 +110,13 @@ class CubariDowlonader:
 
     def download_img(self, url):
         try:
-            if "imgur.com" in url:
-                r = self.download_from_imgur(url)
-            else:
-                r = self.download_from_generic(url)
+            r = requests.get(url, timeout=10, headers={"User-Agent": "Mozilla/5.0"})
             if r.status_code != 200:
                 print("Failed to download page {}. Status code: {}".format(url, r.status_code))
             else:
                 return r.content
         except requests.exceptions.RequestException as e:
             print("Error downloading page {}: {}".format(url, str(e)))
-        
-    def download_from_generic(self, url):
-        r = requests.get(url, timeout=10, headers={"User-Agent": "Mozilla/5.0"})
-        return r
-
-    def download_from_imgur(self, url):
-        url = url.replace("i.", "")
-        r = requests.get(url, timeout=10, headers={"User-Agent": "Mozilla/5.0"})
-        return r
     
     def get_data_from_proxy(self, chapter_link):
         r = requests.get(self.site_url.format(chapter_link))
@@ -141,6 +129,12 @@ class CubariDowlonader:
 
 
 if __name__ == '__main__':
+
+    # CubariDowlonader().list_chapter("https://cubari.moe/read/gist/JECbu/")
+    # CubariDowlonader().download_chapters("https://cubari.moe/read/gist/JECbu/", ['1','4'])
+    CubariDowlonader().download_chapters("https://cubari.moe/read/gist/cmF3L2NoaWNrbi1ub29kbGUvU2VyaWVzLS9tYWluL0hhcmFwZWtvLmpzb24/", ['13'])
+    # CubariDowlonader().download_chapters("https://cubari.moe/read/gist/JECbu/")
+
     parser = argparse.ArgumentParser(description='Cubari Manga Downloader.')
 
     parser.add_argument('link', type=str, nargs='?',
